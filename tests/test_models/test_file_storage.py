@@ -1,6 +1,7 @@
 #!/usr/bin/python3
-"""Defines the FileStorage class."""
-import json
+""" this script defines test for filestorage """
+import unittest
+from unittest.mock import patch, mock_open
 from models.base_model import BaseModel
 from models.user import User
 from models.state import State
@@ -8,42 +9,51 @@ from models.city import City
 from models.place import Place
 from models.amenity import Amenity
 from models.review import Review
+from models import storage
 
 
-class FileStorage:
-    """Represent an abstracted storage engine.
+class TestFileStorage(unittest.TestCase):
+    """Test cases for the FileStorage class."""
 
-    Attributes:
-        __file_path (str): The name of the file to save objects to.
-        __objects (dict): A dictionary of instantiated objects.
-    """
-    __file_path = "file.json"
-    __objects = {}
+    def setUp(self):
+        """Set up the test environment."""
+        self.file_content = {
+            "BaseModel.1234": {
+                "__class__": "BaseModel",
+                "id": "1234",
+                "name": "TestObject",
+                "created_at": "2023-01-01T00:00:00",
+                "updated_at": "2023-01-01T00:00:00"
+            }
+        }
 
-    def all(self):
-        """Return the dictionary __objects."""
-        return FileStorage.__objects
+    @patch("builtins.open", new_callable=mock_open, read_data=json.dumps(file_content))
+    def test_reload(self, mock_open):
+        """Test reload method."""
+        storage.reload()
+        self.assertEqual(storage.all()["BaseModel.1234"].name, "TestObject")
 
-    def new(self, obj):
-        """Set in __objects obj with key <obj_class_name>.id"""
-        ocname = obj.__class__.__name__
-        FileStorage.__objects["{}.{}".format(ocname, obj.id)] = obj
+    @patch("builtins.open", new_callable=mock_open)
+    def test_save(self, mock_open):
+        """Test save method."""
+        obj = BaseModel(name="TestObject")
+        storage.new(obj)
+        storage.save()
+        mock_open.assert_called_with(storage.__file_path, "w")
 
-    def save(self):
-        """Serialize __objects to the JSON file __file_path."""
-        odict = FileStorage.__objects
-        objdict = {obj: odict[obj].to_dict() for obj in odict.keys()}
-        with open(FileStorage.__file_path, "w") as f:
-            json.dump(objdict, f)
+    def test_all(self):
+        """Test all method."""
+        obj = BaseModel(name="TestObject")
+        storage.new(obj)
+        self.assertEqual(storage.all()["BaseModel.{}".format(obj.id)], obj)
 
-    def reload(self):
-        """Deserialize the JSON file __file_path to __objects, if it exists."""
-        try:
-            with open(FileStorage.__file_path) as f:
-                objdict = json.load(f)
-                for o in objdict.values():
-                    cls_name = o["__class__"]
-                    del o["__class__"]
-                    self.new(eval(cls_name)(**o))
-        except FileNotFoundError:
-            return
+    def test_new(self):
+        """Test new method."""
+        obj = BaseModel(name="TestObject")
+        storage.new(obj)
+        self.assertIn("BaseModel.{}".format(obj.id), storage.__objects)
+
+
+if __name__ == "__main__":
+    unittest.main()
+

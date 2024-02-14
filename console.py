@@ -1,6 +1,6 @@
-console.py
 #!/usr/bin/python3
 """Defines the HBnB console."""
+
 import cmd
 import re
 from shlex import split
@@ -15,6 +15,7 @@ from models.review import Review
 
 
 def parse(arg):
+    """Parse a string argument into tokens and return as a list."""
     curly_braces = re.search(r"\{(.*?)\}", arg)
     brackets = re.search(r"\[(.*?)\]", arg)
     if curly_braces is None:
@@ -33,11 +34,7 @@ def parse(arg):
 
 
 class HBNBCommand(cmd.Cmd):
-    """Defines the HolbertonBnB command interpreter.
-
-    Attributes:
-        prompt (str): The command prompt.
-    """
+    """HolbertonBnB command interpreter."""
 
     prompt = "(hbnb) "
     __classes = {
@@ -55,7 +52,7 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def default(self, arg):
-        """Default behavior for cmd module when input is invalid"""
+        """Default behavior for cmd module when input is invalid."""
         argdict = {
             "all": self.do_all,
             "show": self.do_show,
@@ -85,8 +82,9 @@ class HBNBCommand(cmd.Cmd):
         return True
 
     def do_create(self, arg):
-        """Usage: create <class>
-        Create a new class instance and print its id.
+        """Create a new class instance and print its id.
+
+        Usage: create <class>
         """
         argl = parse(arg)
         if len(argl) == 0:
@@ -98,8 +96,9 @@ class HBNBCommand(cmd.Cmd):
             storage.save()
 
     def do_show(self, arg):
-        """Usage: show <class> <id> or <class>.show(<id>)
-        Display the string representation of a class instance of a given id.
+        """Display the string representation of a class instance of a given id.
+
+        Usage: show <class> <id> or <class>.show(<id>)
         """
         argl = parse(arg)
         objdict = storage.all()
@@ -115,8 +114,10 @@ class HBNBCommand(cmd.Cmd):
             print(objdict["{}.{}".format(argl[0], argl[1])])
 
     def do_destroy(self, arg):
-        """Usage: destroy <class> <id> or <class>.destroy(<id>)
-        Delete a class instance of a given id."""
+        """Delete a class instance of a given id.
+
+        Usage: destroy <class> <id> or <class>.destroy(<id>)
+        """
         argl = parse(arg)
         objdict = storage.all()
         if len(argl) == 0:
@@ -132,9 +133,11 @@ class HBNBCommand(cmd.Cmd):
             storage.save()
 
     def do_all(self, arg):
-        """Usage: all or all <class> or <class>.all()
-        Display string representations of all instances of a given class.
-        If no class is specified, displays all instantiated objects."""
+        """Display string representations of all instances of a given class.
+
+        Usage: all or all <class> or <class>.all()
+        If no class is specified, displays all instantiated objects.
+        """
         argl = parse(arg)
         if len(argl) > 0 and argl[0] not in HBNBCommand.__classes:
             print("** class doesn't exist **")
@@ -148,8 +151,10 @@ class HBNBCommand(cmd.Cmd):
             print(objl)
 
     def do_count(self, arg):
-        """Usage: count <class> or <class>.count()
-        Retrieve the number of instances of a given class."""
+        """Retrieve the number of instances of a given class.
+
+        Usage: count <class> or <class>.count()
+        """
         argl = parse(arg)
         count = 0
         for obj in storage.all().values():
@@ -158,11 +163,13 @@ class HBNBCommand(cmd.Cmd):
         print(count)
 
     def do_update(self, arg):
-        """Usage: update <class> <id> <attribute_name> <attribute_value> or
-       <class>.update(<id>, <attribute_name>, <attribute_value>) or
-       <class>.update(<id>, <dictionary>)
-        Update a class instance of a given id by adding or updating
-        a given attribute key/value pair or dictionary."""
+        """Update a class instance of a given id by adding or updating
+        a given attribute key/value pair or dictionary.
+
+        Usage: update <class> <id> <attribute_name> <attribute_value> or
+        <class>.update(<id>, <attribute_name>, <attribute_value>) or
+        <class>.update(<id>, <dictionary>)
+        """
         argl = parse(arg)
         objdict = storage.all()
 
@@ -209,3 +216,4 @@ class HBNBCommand(cmd.Cmd):
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
+
